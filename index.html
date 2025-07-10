@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Chosen Palette: Warm Neutrals (bg-stone-50, text-gray-800, accent-stone-600) -->
     <!-- Application Structure Plan: A dashboard-style SPA. Top section features interactive inputs for stock name and key financial assumptions (Initial EPS, EPS Growth, Future PE, Desired CAGR, Min/Max Scenario PE, Scenario Desired CAGR). Below are dynamic cards showing calculated results. A central line chart visualizes the 10-year price projection, and a scenario table offers comparative data. This structure was chosen to empower users to actively explore financial what-if scenarios for any stock, making complex projections tangible and understandable, rather than just presenting a static report. -->
-    <!-- Visualization & Content Choices: 1. Stock Name Input -> Goal: Inform/Input -> Presentation: HTML Text Input -> Interaction: Updates page title and headings. 2. Fetch EPS Button -> Goal: Inform/Input -> Presentation: HTML Button -> Interaction: Simulates fetching and populating Initial EPS for demonstration. 3. Assumptions (Initial EPS, EPS Growth, PE, Desired CAGR, Min/Max Scenario PE, Scenario Desired CAGR) -> Goal: Organize/Input -> Presentation: HTML Range Sliders & Number Input -> Interaction: Real-time update of all calculations and visuals -> Justification: Intuitive and direct manipulation for scenario analysis. 4. 10-Year Price Projection -> Goal: Change -> Presentation: Line Chart -> Interaction: Redraws based on input changes -> Justification: Best method to visualize growth over time. -> Library: Chart.js (Canvas). 5. Key Metrics (Future EPS, Future Price, Required Investment Price) -> Goal: Inform -> Presentation: Styled HTML 'cards' -> Interaction: Values update from inputs -> Justification: Provides clear, immediate feedback on user inputs. 6. Investment Scenarios -> Goal: Compare -> Presentation: HTML Table -> Interaction: Updates based on EPS Growth and Scenario PE range inputs and Scenario Desired CAGR -> Justification: Allows easy comparison of multiple PE outcomes for a given growth rate with user-defined PE ranges and desired returns. -->
+    <!-- Visualization & Content Choices: 1. Stock Name Input -> Goal: Inform/Input -> Presentation: HTML Text Input -> Interaction: Updates page title and headings. 2. Fetch EPS Button -> Goal: Inform/Input -> Presentation: HTML Button -> Interaction: Simulates fetching and populating Initial EPS for demonstration. 3. Assumptions (Initial EPS, EPS Growth, PE, Desired CAGR, Min/Max Scenario PE, Scenario Desired CAGR) -> Goal: Organize/Input -> Presentation: HTML Range Sliders & Number Input -> Interaction: Real-time update of all calculations and visuals -> Justification: Intuitive and direct manipulation for scenario analysis. 4. 10-Year Price Projection -> Goal: Change -> Presentation: Line Chart -> Interaction: Redraws based on input changes -> Justification: Best method to visualize growth over time. -> Library: Chart.js (Canvas). 5. Key Metrics (Future EPS, Future Price, Required Investment Price) -> Goal: Inform -> Presentation: Styled HTML 'cards' -> Interaction: Values update from inputs -> Justification: Provides clear, immediate feedback on user inputs. 6. Investment Scenarios -> Goal: Compare -> Presentation: HTML Table -> Interaction: Updates based on EPS Growth and Scenario PE range inputs and Scenario Desired CAGR -> Justification: Allows easy comparison of multiple PE outcomes for a given growth rate with user-defined PE ranges and desired returns, now including yearly price projections for more detailed analysis. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -141,9 +141,19 @@
                     <table class="w-full min-w-max text-center">
                         <thead>
                             <tr class="border-b-2 border-stone-300">
-                                <th class="p-4 font-semibold text-gray-700">Assumed Future P/E</th>
-                                <th class="p-4 font-semibold text-gray-700">Future Stock Price</th>
-                                <th class="p-4 font-semibold text-gray-700 bg-stone-100 rounded-t-lg">Required Investment Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Assumed Future P/E</th>
+                                <!-- Dynamic headers for Year 1 to Year 10 -->
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 1 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 2 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 3 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 4 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 5 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 6 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 7 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 8 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 9 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 10 Price</th>
+                                <th class="p-4 font-semibold text-gray-700 bg-stone-100 rounded-t-lg whitespace-nowrap">Required Investment Price</th>
                             </tr>
                         </thead>
                         <tbody id="scenarios-table-body">
@@ -340,7 +350,6 @@
 
             function updateTable(initialEPS, epsCagr, scenarioDesiredCagr) {
                 scenariosTableBody.innerHTML = '';
-                const futureEps = calculateFutureValue(initialEPS, epsCagr, projectionYears);
                 
                 const minPe = parseInt(minScenarioPeInput.value);
                 const maxPe = parseInt(maxScenarioPeInput.value);
@@ -355,12 +364,18 @@
                      return;
                 }
                 
-                // Update the heading for the scenario table
                 scenarioTableHeading.textContent = `Investment Scenarios for ${(scenarioDesiredCagr * 100).toFixed(1)}% Desired CAGR`;
 
                 scenarioPEs.forEach((pe, index) => {
-                    const futurePrice = futureEps * pe;
-                    const investmentPrice = calculatePresentValue(futurePrice, scenarioDesiredCagr, projectionYears);
+                    const yearlyPrices = [];
+                    for (let year = 1; year <= projectionYears; year++) {
+                        const epsForYear = calculateFutureValue(initialEPS, epsCagr, year);
+                        const priceForYear = epsForYear * pe;
+                        yearlyPrices.push(formatCurrency(priceForYear));
+                    }
+
+                    const futurePriceYear10 = calculateFutureValue(initialEPS, epsCagr, projectionYears) * pe;
+                    const investmentPrice = calculatePresentValue(futurePriceYear10, scenarioDesiredCagr, projectionYears);
 
                     const row = document.createElement('tr');
                     row.className = 'border-b border-stone-200';
@@ -368,11 +383,13 @@
                         row.classList.add('bg-stone-50');
                     }
                     
-                    row.innerHTML = `
-                        <td class="p-4 font-medium">${pe}</td>
-                        <td class="p-4">${formatCurrency(futurePrice)}</td>
-                        <td class="p-4 font-bold text-teal-700 bg-stone-100">${formatCurrency(investmentPrice)}</td>
-                    `;
+                    let rowHtml = `<td class="p-4 font-medium">${pe}</td>`;
+                    yearlyPrices.forEach(price => {
+                        rowHtml += `<td class="p-4 whitespace-nowrap">${price}</td>`;
+                    });
+                    rowHtml += `<td class="p-4 font-bold text-teal-700 bg-stone-100 whitespace-nowrap">${formatCurrency(investmentPrice)}</td>`;
+                    
+                    row.innerHTML = rowHtml;
                     scenariosTableBody.appendChild(row);
                 });
             }
@@ -397,7 +414,7 @@
             desiredCagrSlider.addEventListener('input', updateDashboard);
             minScenarioPeInput.addEventListener('input', updateDashboard);
             maxScenarioPeInput.addEventListener('input', updateDashboard);
-            scenarioDesiredCagrInput.addEventListener('input', updateDashboard); // New event listener
+            scenarioDesiredCagrInput.addEventListener('input', updateDashboard);
 
 
             updateDashboard();
