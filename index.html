@@ -5,22 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Stock Valuation Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js is no longer needed as the graph is removed -->
     <!-- Chosen Palette: Warm Neutrals (bg-stone-50, text-gray-800, accent-stone-600) -->
-    <!-- Application Structure Plan: A dashboard-style SPA. Top section features interactive inputs for stock name and key financial assumptions (Initial EPS, EPS Growth, Future PE, Desired CAGR, Min/Max Scenario PE, Scenario Desired CAGR). Below are dynamic cards showing calculated results. A central line chart visualizes the 10-year price projection, and a scenario table offers comparative data. This structure was chosen to empower users to actively explore financial what-if scenarios for any stock, making complex projections tangible and understandable, rather than just presenting a static report. -->
-    <!-- Visualization & Content Choices: 1. Stock Name Input -> Goal: Inform/Input -> Presentation: HTML Text Input -> Interaction: Updates page title and headings. 2. Fetch EPS Button -> Goal: Inform/Input -> Presentation: HTML Button -> Interaction: Simulates fetching and populating Initial EPS for demonstration. 3. Assumptions (Initial EPS, EPS Growth, PE, Desired CAGR, Min/Max Scenario PE, Scenario Desired CAGR) -> Goal: Organize/Input -> Presentation: HTML Range Sliders & Number Input -> Interaction: Real-time update of all calculations and visuals -> Justification: Intuitive and direct manipulation for scenario analysis. 4. 10-Year Price Projection -> Goal: Change -> Presentation: Line Chart -> Interaction: Redraws based on input changes -> Justification: Best method to visualize growth over time. -> Library: Chart.js (Canvas). 5. Key Metrics (Future EPS, Future Price, Required Investment Price) -> Goal: Inform -> Presentation: Styled HTML 'cards' -> Interaction: Values update from inputs -> Justification: Provides clear, immediate feedback on user inputs. 6. Investment Scenarios -> Goal: Compare -> Presentation: HTML Table -> Interaction: Updates based on EPS Growth and Scenario PE range inputs and Scenario Desired CAGR -> Justification: Allows easy comparison of multiple PE outcomes for a given growth rate with user-defined PE ranges and desired returns, now including yearly price projections for more detailed analysis. -->
+    <!-- Application Structure Plan: A dashboard-style SPA. Top section features interactive inputs for stock name and key financial assumptions (Initial EPS, EPS Growth, Min/Max Scenario PE, Scenario Desired CAGR). Below is a detailed scenario table offering comparative data. This streamlined structure focuses on enabling users to actively explore multiple financial what-if scenarios, removing single-point calculation displays and the graph for a more focused tabular analysis. -->
+    <!-- Visualization & Content Choices: 1. Stock Name Input -> Goal: Inform/Input -> Presentation: HTML Text Input -> Interaction: Updates page title and headings. 2. Assumptions (Initial EPS, EPS Growth, Min/Max Scenario PE, Scenario Desired CAGR) -> Goal: Organize/Input -> Presentation: HTML Range Sliders & Number Input -> Interaction: Real-time update of all calculations and visuals -> Justification: Intuitive and direct manipulation for scenario analysis. 3. Investment Scenarios -> Goal: Compare -> Presentation: HTML Table -> Interaction: Updates based on EPS Growth and Scenario PE range inputs and Scenario Desired CAGR -> Justification: Allows easy comparison of multiple PE outcomes for a given growth rate with user-defined PE ranges and desired returns, including yearly price projections for detailed analysis and specific investment prices for 3, 5, and 10-year horizons. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
         @import url('https://rsms.me/inter/inter.css');
-        .chart-container {
-            position: relative;
-            height: 50vh;
-            width: 100%;
-            max-height: 450px;
-        }
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -64,9 +58,7 @@
                         <label for="initial-eps-input" class="font-medium text-gray-700">Initial EPS (Current)</label>
                         <input id="initial-eps-input" type="number" min="0.01" step="0.01" value="51.47" class="w-full p-2 border border-stone-300 rounded-lg focus:ring-stone-500 focus:border-stone-500 text-lg">
                     </div>
-                     <div class="flex items-end justify-center">
-                        <button id="fetch-eps-button" class="bg-stone-700 text-white px-4 py-2 rounded-lg shadow-md hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 transition-colors duration-200">Fetch EPS (Simulated)</button>
-                    </div>
+                     <!-- Removed Fetch EPS (Simulated) button and its container -->
 
                     <div class="flex flex-col space-y-2">
                         <label for="eps-cagr-slider" class="font-medium text-gray-700">Annual EPS Growth (CAGR)</label>
@@ -75,21 +67,7 @@
                             <span id="eps-cagr-value" class="font-bold text-stone-800 text-lg w-20 text-center">12.0%</span>
                         </div>
                     </div>
-                    <div class="flex flex-col space-y-2">
-                        <label for="pe-ratio-slider" class="font-medium text-gray-700">Future P/E Ratio (in 10 Yrs)</label>
-                         <div class="flex items-center space-x-4">
-                            <input id="pe-ratio-slider" type="range" min="10" max="40" value="25" step="1" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-600">
-                            <span id="pe-ratio-value" class="font-bold text-stone-800 text-lg w-20 text-center">25</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col space-y-2">
-                        <label for="desired-cagr-slider" class="font-medium text-gray-700">Desired Investment Gain (CAGR)</label>
-                         <div class="flex items-center space-x-4">
-                            <input id="desired-cagr-slider" type="range" min="10" max="25" value="15" step="1" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-600">
-                            <span id="desired-cagr-value" class="font-bold text-stone-800 text-lg w-20 text-center">15%</span>
-                        </div>
-                    </div>
-
+                    
                     <!-- New P/E Range for Scenarios Table -->
                     <div class="flex flex-col space-y-2">
                         <label for="min-scenario-pe" class="font-medium text-gray-700">Min Scenario P/E</label>
@@ -101,7 +79,7 @@
                     </div>
                     <!-- New Desired CAGR for Scenarios Table -->
                     <div class="flex flex-col space-y-2">
-                        <label for="scenario-desired-cagr-input" class="font-medium text-gray-700">Desired CAGR for Scenarios</label>
+                        <label for="scenario-desired-cagr-input" class="font-medium text-gray-700">Desired Investment CAGR for Scenarios</label>
                         <div class="flex items-center space-x-4">
                             <input id="scenario-desired-cagr-input" type="range" min="5" max="25" value="15" step="0.5" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-600">
                             <span id="scenario-desired-cagr-value" class="font-bold text-stone-800 text-lg w-20 text-center">15.0%</span>
@@ -110,29 +88,8 @@
                 </div>
             </section>
 
-            <section>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                    <div class="bg-stone-100 p-6 rounded-xl shadow-md border border-stone-200">
-                        <h3 class="text-md sm:text-lg font-semibold text-gray-600">Projected EPS (Year 10)</h3>
-                        <p id="future-eps" class="text-2xl sm:text-3xl font-bold text-stone-800 mt-2">₹0.00</p>
-                    </div>
-                    <div class="bg-stone-100 p-6 rounded-xl shadow-md border border-stone-200">
-                        <h3 class="text-md sm:text-lg font-semibold text-gray-600">Projected Price (Year 10)</h3>
-                        <p id="future-price" class="text-2xl sm:text-3xl font-bold text-stone-800 mt-2">₹0.00</p>
-                    </div>
-                    <div class="bg-teal-600 text-white p-6 rounded-xl shadow-lg border border-teal-700">
-                        <h3 class="text-md sm:text-lg font-semibold">Required Investment Price Today</h3>
-                        <p id="investment-price" class="text-2xl sm:text-3xl font-bold mt-2">₹0.00</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-stone-200">
-                 <h2 class="text-2xl font-semibold mb-4 text-center">10-Year Stock Price Projection</h2>
-                <div class="chart-container mx-auto max-w-5xl">
-                    <canvas id="price-projection-chart"></canvas>
-                </div>
-            </section>
+            <!-- Removed Results Section -->
+            <!-- Removed Chart Section -->
             
             <section class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-stone-200">
                 <h2 id="scenario-table-heading" class="text-2xl font-semibold mb-4 text-center">Investment Scenarios for 15.0% Desired CAGR</h2>
@@ -153,7 +110,9 @@
                                 <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 8 Price</th>
                                 <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 9 Price</th>
                                 <th class="p-4 font-semibold text-gray-700 whitespace-nowrap">Year 10 Price</th>
-                                <th class="p-4 font-semibold text-gray-700 bg-stone-100 rounded-t-lg whitespace-nowrap">Required Investment Price</th>
+                                <th class="p-4 font-semibold text-gray-700 bg-stone-100 rounded-t-lg whitespace-nowrap">Required Investment Price (10 Yrs)</th>
+                                <th class="p-4 font-semibold text-gray-700 bg-stone-100 rounded-t-lg whitespace-nowrap">Required Investment Price (5 Yrs)</th>
+                                <th class="p-4 font-semibold text-gray-700 bg-stone-100 rounded-t-lg whitespace-nowrap">Required Investment Price (3 Yrs)</th>
                             </tr>
                         </thead>
                         <tbody id="scenarios-table-body">
@@ -181,31 +140,24 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const projectionYears = 10;
-            const stockData = {
-                'reliance industries': 51.47,
-                'jyoti resins': 61.57,
-            };
+            // Removed stockData as fetch EPS button is removed
+            // const stockData = {
+            //     'reliance industries': 51.47,
+            //     'jyoti resins': 61.57,
+            // };
 
             const stockNameInput = document.getElementById('stock-name-input');
             const stockNameDisplay = document.getElementById('stock-name-display');
             const initialEpsInput = document.getElementById('initial-eps-input');
-            const fetchEpsButton = document.getElementById('fetch-eps-button');
+            // const fetchEpsButton = document.getElementById('fetch-eps-button'); // Removed
             const epsCagrSlider = document.getElementById('eps-cagr-slider');
-            const peRatioSlider = document.getElementById('pe-ratio-slider');
-            const desiredCagrSlider = document.getElementById('desired-cagr-slider');
             const minScenarioPeInput = document.getElementById('min-scenario-pe');
             const maxScenarioPeInput = document.getElementById('max-scenario-pe');
             const scenarioDesiredCagrInput = document.getElementById('scenario-desired-cagr-input');
 
 
             const epsCagrValue = document.getElementById('eps-cagr-value');
-            const peRatioValue = document.getElementById('pe-ratio-value');
-            const desiredCagrValue = document.getElementById('desired-cagr-value');
             const scenarioDesiredCagrValue = document.getElementById('scenario-desired-cagr-value');
-
-            const futureEpsDisplay = document.getElementById('future-eps');
-            const futurePriceDisplay = document.getElementById('future-price');
-            const investmentPriceDisplay = document.getElementById('investment-price');
 
             const scenariosTableBody = document.getElementById('scenarios-table-body');
             const scenarioTableHeading = document.getElementById('scenario-table-heading');
@@ -215,7 +167,7 @@
             const modalMessage = document.getElementById('modal-message');
             const modalCloseButton = document.getElementById('modal-close-button');
 
-            let chart;
+            // let chart; // Removed chart variable
 
             function showCustomAlert(title, message) {
                 modalTitle.textContent = title;
@@ -246,107 +198,93 @@
 
                 const initialEPS = parseFloat(initialEpsInput.value);
                 const epsCagr = parseFloat(epsCagrSlider.value) / 100;
-                const futurePeRatio = parseInt(peRatioSlider.value);
-                const desiredCagr = parseFloat(desiredCagrSlider.value) / 100;
                 const scenarioDesiredCagr = parseFloat(scenarioDesiredCagrInput.value) / 100;
 
                 if (isNaN(initialEPS) || initialEPS <= 0) {
-                    futureEpsDisplay.textContent = 'Invalid EPS';
-                    futurePriceDisplay.textContent = 'N/A';
-                    investmentPriceDisplay.textContent = 'N/A';
-                    if (chart) {
-                        chart.destroy();
-                        chart = null;
-                    }
+                    // Removed chart related destruction
                     scenariosTableBody.innerHTML = '';
                     return;
                 }
 
                 epsCagrValue.textContent = `${(epsCagr * 100).toFixed(1)}%`;
-                peRatioValue.textContent = futurePeRatio;
-                desiredCagrValue.textContent = `${(desiredCagr * 100).toFixed(0)}%`;
                 scenarioDesiredCagrValue.textContent = `${(scenarioDesiredCagr * 100).toFixed(1)}%`;
-
-                const futureEps = calculateFutureValue(initialEPS, epsCagr, projectionYears);
-                const futurePrice = futureEps * futurePeRatio;
-                const requiredInvestmentPrice = calculatePresentValue(futurePrice, desiredCagr, projectionYears);
-
-                futureEpsDisplay.textContent = formatCurrency(futureEps);
-                futurePriceDisplay.textContent = formatCurrency(futurePrice);
-                investmentPriceDisplay.textContent = formatCurrency(requiredInvestmentPrice);
                 
-                updateChart(initialEPS, epsCagr, futurePeRatio);
+                // Removed chart update call
+                // For the chart, we need a default PE. Let's use the mid-point of the scenario PE range or a reasonable default.
+                // const defaultChartPe = 25; // A reasonable default for chart
+                // updateChart(initialEPS, epsCagr, defaultChartPe);
                 updateTable(initialEPS, epsCagr, scenarioDesiredCagr);
             }
             
-            function updateChart(initialEPS, epsCagr, futurePeRatio) {
-                const labels = Array.from({ length: projectionYears + 1 }, (_, i) => `Year ${i}`);
-                const data = [];
-                for (let i = 0; i <= projectionYears; i++) {
-                    const currentEps = calculateFutureValue(initialEPS, epsCagr, i);
-                    const price = currentEps * futurePeRatio;
-                    data.push(price);
-                }
+            // Removed updateChart function
+            // function updateChart(initialEPS, epsCagr, futurePeRatio) {
+            //     const labels = Array.from({ length: projectionYears + 1 }, (_, i) => `Year ${i}`);
+            //     const data = [];
+            //     for (let i = 0; i <= projectionYears; i++) {
+            //         const currentEps = calculateFutureValue(initialEPS, epsCagr, i);
+            //         const price = currentEps * futurePeRatio;
+            //         data.push(price);
+            //     }
 
-                const chartData = {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Projected Stock Price (₹)',
-                        data: data,
-                        borderColor: '#4a5568',
-                        backgroundColor: 'rgba(74, 85, 104, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#2d3748',
-                        pointRadius: 4,
-                        pointHoverRadius: 7
-                    }]
-                };
+            //     const chartData = {
+            //         labels: labels,
+            //         datasets: [{
+            //             label: 'Projected Stock Price (₹)',
+            //             data: data,
+            //             borderColor: '#4a5568',
+            //             backgroundColor: 'rgba(74, 85, 104, 0.1)',
+            //             fill: true,
+            //             tension: 0.4,
+            //             pointBackgroundColor: '#2d3748',
+            //             pointRadius: 4,
+            //             pointHoverRadius: 7
+            //         }]
+            //     };
 
-                const ctx = document.getElementById('price-projection-chart').getContext('2d');
-                if (chart) {
-                    chart.data = chartData;
-                    chart.update();
-                } else {
-                    chart = new Chart(ctx, {
-                        type: 'line',
-                        data: chartData,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: false,
-                                    ticks: {
-                                        callback: function(value) {
-                                            return formatCurrency(value);
-                                        }
-                                    }
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            let label = context.dataset.label || '';
-                                            if (label) {
-                                                label += ': ';
-                                            }
-                                            if (context.parsed.y !== null) {
-                                                label += formatCurrency(context.parsed.y);
-                                            }
-                                            return label;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
+            //     const ctx = document.getElementById('price-projection-chart').getContext('2d');
+            //     if (chart) {
+            //         chart.data = chartData;
+            //         chart.update();
+            //     } else {
+            //         chart = new Chart(ctx, {
+            //             type: 'line',
+            //             data: chartData,
+            //             options: {
+            //                 responsive: true,
+            //                 maintainAspectRatio: false,
+            //                 scales: {
+            //                     y: {
+            //                         beginAtZero: false,
+            //                         ticks: {
+            //                             callback: function(value) {
+            //                                 return formatCurrency(value);
+            //                             }
+            //                         }
+            //                     }
+            //                 },
+            //                 plugins: {
+            //                     legend: {
+            //                         display: false
+            //                     },
+            //                     tooltip: {
+            //                         callbacks: {
+            //                             label: function(context) {
+            //                                 let label = context.dataset.label || '';
+            //                                 if (label) {
+            //                                     label += ': ';
+            //                                 }
+            //                                 if (context.parsed.y !== null) {
+            //                                     label += formatCurrency(context.parsed.y);
+            //                                 }
+            //                                 return label;
+            //                             }
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         });
+            //     }
+            // }
 
             function updateTable(initialEPS, epsCagr, scenarioDesiredCagr) {
                 scenariosTableBody.innerHTML = '';
@@ -370,12 +308,19 @@
                     const yearlyPrices = [];
                     for (let year = 1; year <= projectionYears; year++) {
                         const epsForYear = calculateFutureValue(initialEPS, epsCagr, year);
-                        const priceForYear = epsForYear * pe;
+                        const priceForYear = epsForYear * pe; // Price for that year with this PE
                         yearlyPrices.push(formatCurrency(priceForYear));
                     }
 
+                    // Calculate future prices for 3, 5, and 10 years based on their respective EPS projections
+                    const futurePriceYear3 = calculateFutureValue(initialEPS, epsCagr, 3) * pe;
+                    const futurePriceYear5 = calculateFutureValue(initialEPS, epsCagr, 5) * pe;
                     const futurePriceYear10 = calculateFutureValue(initialEPS, epsCagr, projectionYears) * pe;
-                    const investmentPrice = calculatePresentValue(futurePriceYear10, scenarioDesiredCagr, projectionYears);
+
+                    const investmentPrice10Yrs = calculatePresentValue(futurePriceYear10, scenarioDesiredCagr, projectionYears);
+                    const investmentPrice5Yrs = calculatePresentValue(futurePriceYear5, scenarioDesiredCagr, 5);
+                    const investmentPrice3Yrs = calculatePresentValue(futurePriceYear3, scenarioDesiredCagr, 3);
+
 
                     const row = document.createElement('tr');
                     row.className = 'border-b border-stone-200';
@@ -387,31 +332,32 @@
                     yearlyPrices.forEach(price => {
                         rowHtml += `<td class="p-4 whitespace-nowrap">${price}</td>`;
                     });
-                    rowHtml += `<td class="p-4 font-bold text-teal-700 bg-stone-100 whitespace-nowrap">${formatCurrency(investmentPrice)}</td>`;
+                    rowHtml += `<td class="p-4 font-bold text-teal-700 bg-stone-100 whitespace-nowrap">${formatCurrency(investmentPrice10Yrs)}</td>`;
+                    rowHtml += `<td class="p-4 font-bold text-teal-700 bg-stone-100 whitespace-nowrap">${formatCurrency(investmentPrice5Yrs)}</td>`;
+                    rowHtml += `<td class="p-4 font-bold text-teal-700 bg-stone-100 whitespace-nowrap">${formatCurrency(investmentPrice3Yrs)}</td>`;
                     
                     row.innerHTML = rowHtml;
                     scenariosTableBody.appendChild(row);
                 });
             }
 
-            fetchEpsButton.addEventListener('click', () => {
-                const stockName = stockNameInput.value.trim().toLowerCase();
-                if (stockData[stockName]) {
-                    initialEpsInput.value = stockData[stockName];
-                    updateDashboard();
-                } else {
-                    initialEpsInput.value = '';
-                    showCustomAlert('EPS Data Not Available', `EPS for "${stockNameInput.value.trim()}" is not available in this simulated demo. Please manually enter the current EPS.`);
-                }
-            });
+            // Removed fetchEpsButton event listener and stockData
+            // fetchEpsButton.addEventListener('click', () => {
+            //     const stockName = stockNameInput.value.trim().toLowerCase();
+            //     if (stockData[stockName]) {
+            //         initialEpsInput.value = stockData[stockName];
+            //         updateDashboard();
+            //     } else {
+            //         initialEpsInput.value = '';
+            //         showCustomAlert('EPS Data Not Available', `EPS for "${stockNameInput.value.trim()}" is not available in this simulated demo. Please manually enter the current EPS.`);
+            //     }
+            // });
 
             modalCloseButton.addEventListener('click', hideCustomAlert);
 
             stockNameInput.addEventListener('input', updateDashboard);
             initialEpsInput.addEventListener('input', updateDashboard);
             epsCagrSlider.addEventListener('input', updateDashboard);
-            peRatioSlider.addEventListener('input', updateDashboard);
-            desiredCagrSlider.addEventListener('input', updateDashboard);
             minScenarioPeInput.addEventListener('input', updateDashboard);
             maxScenarioPeInput.addEventListener('input', updateDashboard);
             scenarioDesiredCagrInput.addEventListener('input', updateDashboard);
